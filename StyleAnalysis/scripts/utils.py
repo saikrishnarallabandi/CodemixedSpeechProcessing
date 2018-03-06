@@ -26,12 +26,19 @@ def get_contexts(nparray, window=11):
 
 
 
-def get_xy(A,B, window, categorical_flag):
+def get_xy(A,B, window, categorical_flag, test_flag=0):
    ### A is the input file and B is the output file
 
    # First read the files
-   input_all = np.load(A)
-   output_decimal = np.load(B)
+   if test_flag:
+      input_all = np.load(A)
+      input_padded = pad_nparray(input_all, window)
+      input_contexts = get_contexts(input_padded, window)
+      return input_contexts
+
+   else:
+      input_all = np.load(A)
+      output_decimal = np.load(B)
 
    # Pad the data to account for contexts 
    input_padded = input_all

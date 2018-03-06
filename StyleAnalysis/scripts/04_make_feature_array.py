@@ -20,6 +20,7 @@ for LF in LID_files:
     assert len(input) == len(output)   
     inputs.append(input)
     outputs.append(output)
+    np.save('../mcep_ascii_npy/'+ LF.split('.')[0] + '.mcep', input)
 
 np.save('inputs.npy',inputs)
 np.save('outputs.npy', outputs)    

@@ -25,7 +25,7 @@ for lab_file in lab_files:
       else:
           y[start_frame:end_frame] = 1    
       y[y > 0.0] = 1           
-      y[y< 0] = 0
+      y[y < 0] = 0
       np.savetxt(lang_wav_dir + '/' + fname + '.txt' , y, fmt='%2f')         
 
   except IOError:

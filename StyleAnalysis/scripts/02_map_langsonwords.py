@@ -3,7 +3,7 @@ import os, sys
 
 word_labs_dir = '../word_labs'
 lang_labs_dir = '../lang_labs'
-transcript_file = '../heering.labels'
+transcript_file = '../herring.labels'
 
 
 f = open(transcript_file)
@@ -22,7 +22,7 @@ for line in f:
         if c.split('_')[0] == w.split()[0]:
              g.write(c + ' ' + ' '.join(k for k in w.split()[1:]) + '\n')
         else:
-             print "Something wrong ", fname,  c, w
+             print "Something wrong Fname:", fname, "Content: ",  c, "Words: ", w
              
     g.close()
   except IOError:
