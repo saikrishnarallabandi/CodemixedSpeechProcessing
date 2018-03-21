@@ -1,2 +1,2 @@
-# Diarization
-Repo to hold work done in speaker diarization
+# ASR
+Repo to hold work done in codemixed ASR
