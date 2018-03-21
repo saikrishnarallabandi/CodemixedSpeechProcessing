@@ -20,15 +20,11 @@ cp ../../yesno/s5/local/score.sh local/
 cp -r ../../gale_arabic/s5/local/nnet local
 
 
-# Create segments.txt
-for file in /home3/srallaba/data/Spanish_English_data/segments_lab/*; do fname=$(basename "$file" .lab); echo $fname; done > /tmp/tt
-for file in /home3/srallaba/data/Spanish_English_data/segments_lab/*; do cat $file; done > /tmp/t
-paste -d ' ' /tmp/tt /tmp/t > /home3/srallaba/data/Spanish_English_data/segments.txt
 
 # Copy text
 python2 copy_text.py
 python2 prune_text.py
-iconv -f utf8 -t ascii//TRANSLIT//IGNORE data/train/text_pruned > data/train/text || exit 0
+iconv -f utf8 -t ascii//TRANSLIT//IGNORE data/train/text_pruned | tr '?' ' ' > data/train/text || exit 0
 #unaccent ISO-8859-1 < data/train/text_pruned > data/train/text || exit 0
 echo "Copied text"
 
@@ -41,8 +37,10 @@ do
 done
 
 # Prune based on wav too
+wav-to-duration --read-entire-file scp:data/train/wav.scp ark,t:- > /tmp/wav_dur || exit 0
 python2 prune_wav.py || exit 0
 cp data/train/wav.scp_pruned data/train/wav.scp
+
 
 # Generate utt2spk
 cut -d ' ' -f 1 data/train/text > utterances.train
@@ -69,6 +67,7 @@ for set in train_tr95 train_cv05; do
 done
 
 # Test the language model
+rm -r data/local
 mkdir -p data/local/tmp
 cut -f2- -d' ' < data/train_tr95/text > data/local/tmp/corpus.txt
 #ngram-count  -order 3 -write-vocab data/local/vocab-full.txt -wbdiscount -text data/local/tmp/corpus.txt -lm data/local/lm.arpa
@@ -76,4 +75,42 @@ ngram-count -order 3 -write-vocab data/local/vocab-full.txt -text data/local/tmp
 
 cut -f2- -d' ' < data/train_cv05/text > test_corpus.txt
 ngram -lm data/local/lm.arpa -ppl test_corpus.txt
+
+mkdir -p data/local/dict
+cp spanish_cmudict.txt data/local/dict/dict.txt
+
+# OOV words
+awk 'NR==FNR{words[$1]; next;} !($1 in words)' data/local/dict/dict.txt data/local/vocab-full.txt | egrep -v '<.?s>' > data/local/dict/vocab-oov.txt
+awk 'NR==FNR{words[$1]; next;} ($1 in words)' data/local/vocab-full.txt data/local/dict/dict.txt | egrep -v '<.?s>' > data/local/dict/lexicon-iv.txt
+
+# Lexicon
+# Handle OOVs
+cat data/local/dict/vocab-oov.txt | sed 's/-pau-//' | sed 's/<UNK>//' > oovs
+rm -f pron_oovs
+sed -i '/^$/d'  oovs
+cat oovs | while read line; do pron=`./festival2spanishphones $line`; echo $line $pron >> pron_oovs; done
+cat pron_oovs data/local/dict/lexicon-iv.txt | sort > data/local/dict/lexicon.txt
+
+( echo SIL; echo SPN ) > data/local/dict/silence_phones.txt
+echo SIL > data/local/dict/optional_silence.txt
+
+grep -v -w sil data/local/dict/lexicon.txt | awk '{for(n=2;n<=NF;n++) { p[$n]=1; }} END{for(x in p) {print x}}'  | sort > data/local/dict/nonsilence_phones.txt
+
+echo "--- Adding SIL to the lexicon ..."
+echo -e "!SIL\tSIL" >> data/local/dict/lexicon.txt
+echo -e '-pau-	SIL' >> data/local/dict/lexicon.txt
+echo -e '<unk>	SPN' >> data/local/dict/lexicon.txt
+
+./utils/prepare_lang.sh data/local/dict '<unk>' data/local/lang data/lang || exit 0
+touch  data/local/dict/extra_questions.txt
+
+# FST
+test=data/lang_test
+mkdir -p $test
+for f in phones.txt words.txt phones.txt L.fst L_disambig.fst phones; do     cp -r data/lang/$f $test; done
+cat data/local/lm.arpa | arpa2fst --disambig-symbol=#0 --read-symbol-table=data/lang_test/words.txt - data/lang_test/G.fst
+fstisstochastic data/lang_test/G.fst 
+
+
+. ./train_acousticmodels.sh
 
