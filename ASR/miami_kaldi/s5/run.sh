@@ -20,6 +20,10 @@ cp ../../yesno/s5/local/score.sh local/
 cp -r ../../gale_arabic/s5/local/nnet local
 
 
+# Create segments.txt
+for file in /home3/srallaba/data/Spanish_English_data/segments_lab/*; do fname=$(basename "$file" .lab); echo $fname; done > /tmp/tt
+for file in /home3/srallaba/data/Spanish_English_data/segments_lab/*; do cat $file; done > /tmp/t
+paste -d ' ' /tmp/tt /tmp/t > /home3/srallaba/data/Spanish_English_data/segments.txt
 
 # Copy text
 python2 copy_text.py
