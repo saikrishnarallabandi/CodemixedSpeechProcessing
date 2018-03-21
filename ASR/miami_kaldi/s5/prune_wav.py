@@ -1,9 +1,6 @@
 #!/usr/bin/python
 import os
 
-cmd = 'wav-to-duration scp:data/train/wav.scp ark,t:- > /tmp/wav_dur'
-os.system(cmd)
-
 durations = {}
 f = open('/tmp/wav_dur')
 for line in f:
@@ -25,4 +22,5 @@ for line in f:
 
 f.close()
 g.close()
+
 
