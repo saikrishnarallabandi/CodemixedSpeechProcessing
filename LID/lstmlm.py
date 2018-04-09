@@ -11,6 +11,7 @@ import random
 train_file = '../dataset/wiki.train.npy'
 valid_file = '../dataset/wiki.valid.npy'
 
+# Some stupid way to load. Use dataloader instead of  this
 train_text = []
 A = np.load(train_file)
 batch_size = 32
