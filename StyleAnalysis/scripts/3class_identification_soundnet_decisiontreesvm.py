@@ -18,7 +18,7 @@ layer = 0
 train_input_array = []
 train_output_array = []
 
-'''
+
 # Load the files
 print("Loading Spanish")
 f = open('files.spanish')
@@ -36,7 +36,7 @@ for line in lines:
     train_output_array.append(0)
 
 print "Length of input", len(train_input_array)
-'''
+
 
 # Load the files
 print("Loading English")
