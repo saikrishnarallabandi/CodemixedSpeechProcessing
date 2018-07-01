@@ -1,10 +1,10 @@
 import os
 
-lab_file = '../miami.labels'
+lab_file = '../data/miami.tdd'
 spanish_spans = []
 english_spans = []
 f = open(lab_file)
-g = open('stats.txt','w')
+g = open('../logs/stats.txt','w')
 g.write('utt_name eng_spans spanish_spans num_words dom_lang' + '\n')
 
 for line in f:

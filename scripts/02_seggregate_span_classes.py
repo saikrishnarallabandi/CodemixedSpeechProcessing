@@ -60,11 +60,11 @@ class stats(object):
                  else:
                     print " This utt is crazy: ", self.utts[i]
     
-st = stats('stats.txt')
+st = stats('../logs/stats.txt')
 length = st.get_length()
 st.get_percentages()
-g = open('styles.txt','w')
-h = open('styles_num.txt','w') 
+g = open('../logs/styles.txt','w')
+h = open('../logs/styles_num.txt','w') 
 for i in range(length):
     lang = st.dominant_language[i]
     percent = st.dominant_percent[i]
